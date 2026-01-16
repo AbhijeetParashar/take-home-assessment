@@ -15,6 +15,7 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const intervalRef = useRef(null);
   const isMountedRef = useRef(true);
+  const isInitialLoadRef = useRef(true);
   const fetchFunctionRef = useRef(fetchFunction);
   const { setLastUpdated: setGlobalLastUpdated } = usePollingContext();
 
@@ -22,11 +23,14 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
     fetchFunctionRef.current = fetchFunction;
   }, [fetchFunction]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isInitialLoad = false) => {
     if (!isMountedRef.current) return;
 
     try {
-      setLoading(true);
+      // Only show loading state on initial load, not on subsequent polling
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       setError(null);
       const result = await fetchFunctionRef.current();
 
@@ -38,11 +42,10 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
       }
     } catch (err) {
       if (isMountedRef.current) {
-        console.error("Polling error:", err);
         setError(err.message || "Failed to fetch data");
       }
     } finally {
-      if (isMountedRef.current) {
+      if (isMountedRef.current && isInitialLoad) {
         setLoading(false);
       }
     }
@@ -52,9 +55,14 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
     isMountedRef.current = true;
 
     if (enabled) {
-      fetchData();
+      // Initial fetch with loading state
+      const isInitial = isInitialLoadRef.current;
+      fetchData(isInitial);
+      isInitialLoadRef.current = false;
+
+      // Set up polling interval - subsequent fetches won't show loading
       intervalRef.current = setInterval(() => {
-        fetchData();
+        fetchData(false);
       }, interval);
     }
 

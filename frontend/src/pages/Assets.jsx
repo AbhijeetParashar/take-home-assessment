@@ -84,17 +84,17 @@ const Assets = () => {
     return sorted;
   }, [stocks, crypto, activeFilter, searchQuery, sortConfig]);
 
-  const handleSort = (key, direction) => {
+  const handleSort = useCallback((key, direction) => {
     setSortConfig({ key, direction });
-  };
+  }, []);
 
-  const handleAssetClick = (asset) => {
+  const handleAssetClick = useCallback((asset) => {
     setSelectedAsset(asset);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedAsset(null);
-  };
+  }, []);
 
   if (loading) {
     return (

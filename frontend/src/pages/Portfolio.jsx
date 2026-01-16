@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import { getPortfolio } from "../services/api";
 import { usePolling } from "../hooks/usePolling";
 import PortfolioSummary from "../components/portfolio/PortfolioSummary";
-import PortfolioChart from "../components/portfolio/PortfolioChart";
-import AllocationChart from "../components/portfolio/AllocationChart";
+import LazyPortfolioChart from "../components/portfolio/LazyPortfolioChart";
+import LazyAllocationChart from "../components/portfolio/LazyAllocationChart";
 import PerformanceMetrics from "../components/portfolio/PerformanceMetrics";
 import HoldingsList from "../components/portfolio/HoldingsList";
 import LoadingCard from "../components/ui/LoadingCard";
@@ -107,9 +107,9 @@ const Portfolio = () => {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {historicalData.length > 0 && (
-            <PortfolioChart historicalData={historicalData} />
+            <LazyPortfolioChart historicalData={historicalData} />
           )}
-          {holdings.length > 0 && <AllocationChart holdings={holdings} />}
+          {holdings.length > 0 && <LazyAllocationChart holdings={holdings} />}
         </div>
 
         {/* Performance Metrics */}
