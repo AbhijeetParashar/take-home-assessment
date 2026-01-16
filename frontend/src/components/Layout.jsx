@@ -34,9 +34,9 @@ const Layout = ({ children }) => {
         </div>
       </header>
 
-      <div className="flex">
-        <aside className="w-16 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-[calc(100vh-4rem)] transition-all duration-300 flex flex-col">
-          <nav className="p-2 lg:p-4 flex-1">
+      <div className="flex h-[calc(100vh-4rem)]">
+        <aside className="w-16 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col overflow-hidden">
+          <nav className="p-2 lg:p-4 flex-1 overflow-y-auto">
             <ul className="space-y-2">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.path;
@@ -63,7 +63,7 @@ const Layout = ({ children }) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 transition-colors duration-300">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto transition-colors duration-300">{children}</main>
       </div>
     </div>
   );
