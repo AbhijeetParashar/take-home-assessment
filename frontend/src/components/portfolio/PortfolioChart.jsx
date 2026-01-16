@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -16,7 +16,9 @@ const PortfolioChart = ({ historicalData }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{payload[0].payload.date}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+            {payload[0].payload.date}
+          </p>
           <p className="text-lg font-bold text-pulse-primary">
             {formatCurrency(payload[0].value)}
           </p>
@@ -32,13 +34,8 @@ const PortfolioChart = ({ historicalData }) => {
         Portfolio Value Over Time
       </h2>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={historicalData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="date"
-            stroke="#6b7280"
-            style={{ fontSize: "12px" }}
-          />
+        <AreaChart data={historicalData}>
+          <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: "12px" }} />
           <YAxis
             stroke="#6b7280"
             style={{ fontSize: "12px" }}
@@ -46,16 +43,16 @@ const PortfolioChart = ({ historicalData }) => {
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
-          <Line
+          <Area
             type="monotone"
             dataKey="value"
             stroke="#3b82f6"
             strokeWidth={2}
-            dot={{ fill: "#3b82f6", r: 4 }}
-            activeDot={{ r: 6 }}
+            fill="#3b82f6"
+            fillOpacity={0.3}
             name="Portfolio Value"
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

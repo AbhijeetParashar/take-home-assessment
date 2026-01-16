@@ -1,5 +1,14 @@
 import PropTypes from "prop-types";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { formatCurrency } from "../../utils/formatters";
 
 const PerformanceMetrics = ({ holdings }) => {
@@ -52,6 +61,7 @@ const PerformanceMetrics = ({ holdings }) => {
             fill="#3b82f6"
             name="Gain/Loss"
             radius={[4, 4, 0, 0]}
+            barSize={70}
           />
         </BarChart>
       </ResponsiveContainer>
