@@ -80,7 +80,9 @@ const Portfolio = () => {
   if (loading) {
     return (
       <div>
-        <h1 className="text-3xl font-bold mb-6">Portfolio</h1>
+        <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
+          Portfolio
+        </h1>
         <LoadingCard count={2} />
       </div>
     );
@@ -89,7 +91,9 @@ const Portfolio = () => {
   if (error) {
     return (
       <div>
-        <h1 className="text-3xl font-bold mb-6">Portfolio</h1>
+        <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
+          Portfolio
+        </h1>
         <ErrorMessage message={error} />
       </div>
     );

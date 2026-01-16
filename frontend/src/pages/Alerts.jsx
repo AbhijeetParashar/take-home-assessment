@@ -67,7 +67,9 @@ const Alerts = () => {
   if (loading) {
     return (
       <div>
-        <h1 className="text-3xl font-bold mb-6">Alerts</h1>
+        <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
+          Alerts
+        </h1>
         <LoadingCard count={1} />
       </div>
     );
@@ -76,7 +78,9 @@ const Alerts = () => {
   if (error) {
     return (
       <div>
-        <h1 className="text-3xl font-bold mb-6">Alerts</h1>
+        <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
+          Alerts
+        </h1>
         <ErrorMessage message={error} />
       </div>
     );
