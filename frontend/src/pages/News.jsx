@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { getNews } from "../services/api";
+import { usePolling } from "../hooks/usePolling";
 import CategoryFilter from "../components/news/CategoryFilter";
 import NewsList from "../components/news/NewsList";
 import SearchBar from "../components/assets/SearchBar";
@@ -7,38 +8,24 @@ import LoadingCard from "../components/ui/LoadingCard";
 import ErrorMessage from "../components/ui/ErrorMessage";
 
 const News = () => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await getNews();
-        const newsData = response.data?.data || [];
-
-        setNews(newsData);
-      } catch (err) {
-        setError("Failed to load news. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
+  const fetchNews = useCallback(async () => {
+    const response = await getNews();
+    return response.data?.data || [];
   }, []);
 
+  const { data: news, loading, error } = usePolling(fetchNews, 30000);
+
   const categories = useMemo(() => {
+    if (!news) return [];
     const uniqueCategories = [...new Set(news.map((item) => item.category))];
     return uniqueCategories.sort();
   }, [news]);
 
   const filteredNews = useMemo(() => {
+    if (!news) return [];
     let filtered = news;
 
     if (activeCategory !== "all") {
@@ -73,7 +60,7 @@ const News = () => {
         <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
           News
         </h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message="Failed to load news. Please try again." />
       </div>
     );
   }

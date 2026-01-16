@@ -1,38 +1,23 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { getAlerts } from "../services/api";
+import { usePolling } from "../hooks/usePolling";
 import AlertsGrouped from "../components/alerts/AlertsGrouped";
 import SearchBar from "../components/assets/SearchBar";
 import LoadingCard from "../components/ui/LoadingCard";
 import ErrorMessage from "../components/ui/ErrorMessage";
 
 const Alerts = () => {
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchAlerts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await getAlerts();
-        const alertsData = response.data?.data || [];
-
-        setAlerts(alertsData);
-      } catch (err) {
-        console.error("Error fetching alerts:", err);
-        setError("Failed to load alerts. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAlerts();
+  const fetchAlerts = useCallback(async () => {
+    const response = await getAlerts();
+    return response.data?.data || [];
   }, []);
 
+  const { data: alerts, loading, error } = usePolling(fetchAlerts, 30000);
+
   const filteredAlerts = useMemo(() => {
+    if (!alerts) return [];
     if (!searchQuery) return alerts;
 
     return alerts.filter((alert) =>
@@ -81,7 +66,7 @@ const Alerts = () => {
         <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
           Alerts
         </h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message="Failed to load alerts. Please try again." />
       </div>
     );
   }

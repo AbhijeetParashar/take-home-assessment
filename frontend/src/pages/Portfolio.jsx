@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { getPortfolio } from "../services/api";
+import { usePolling } from "../hooks/usePolling";
 import PortfolioSummary from "../components/portfolio/PortfolioSummary";
 import PortfolioChart from "../components/portfolio/PortfolioChart";
 import AllocationChart from "../components/portfolio/AllocationChart";
@@ -8,74 +9,58 @@ import HoldingsList from "../components/portfolio/HoldingsList";
 import LoadingCard from "../components/ui/LoadingCard";
 import ErrorMessage from "../components/ui/ErrorMessage";
 
+// Helper function to generate historical data
+const generateHistoricalData = (currentValue, totalChange) => {
+  const data = [];
+  const days = 30;
+  const startValue = currentValue - totalChange;
+
+  for (let i = 0; i < days; i++) {
+    const progress = i / (days - 1);
+    const value = startValue + totalChange * progress;
+    const date = new Date();
+    date.setDate(date.getDate() - (days - 1 - i));
+
+    data.push({
+      date: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      value: Math.round(value * 100) / 100,
+    });
+  }
+
+  return data;
+};
+
 const Portfolio = () => {
-  const [portfolioData, setPortfolioData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await getPortfolio();
-        const data = response.data?.data || {};
-        const transformedData = {
-          totalValue: data.totalValue,
-          totalChange: data.totalChange,
-          totalChangePercent: data.totalChangePercent,
-          holdings: (data.assets || []).map((asset) => ({
-            symbol: asset.assetId,
-            name: asset.assetId,
-            shares: asset.quantity,
-            avgCost: asset.avgBuyPrice,
-            currentPrice: asset.currentPrice,
-            currentValue: asset.value,
-            gainLoss: asset.change,
-            returnPercent: asset.changePercent,
-          })),
-          historicalData: generateHistoricalData(
-            data.totalValue,
-            data.totalChange
-          ),
-        };
-
-        setPortfolioData(transformedData);
-      } catch (err) {
-        console.error("Error fetching portfolio:", err);
-        setError("Failed to load portfolio. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+  const fetchPortfolio = useCallback(async () => {
+    const response = await getPortfolio();
+    const data = response.data?.data || {};
+    const transformedData = {
+      totalValue: data.totalValue,
+      totalChange: data.totalChange,
+      totalChangePercent: data.totalChangePercent,
+      holdings: (data.assets || []).map((asset) => ({
+        symbol: asset.assetId,
+        name: asset.assetId,
+        shares: asset.quantity,
+        avgCost: asset.avgBuyPrice,
+        currentPrice: asset.currentPrice,
+        currentValue: asset.value,
+        gainLoss: asset.change,
+        returnPercent: asset.changePercent,
+      })),
+      historicalData: generateHistoricalData(
+        data.totalValue,
+        data.totalChange
+      ),
     };
 
-    fetchPortfolio();
+    return transformedData;
   }, []);
 
-  // Helper function to generate historical data
-  const generateHistoricalData = (currentValue, totalChange) => {
-    const data = [];
-    const days = 30;
-    const startValue = currentValue - totalChange;
-
-    for (let i = 0; i < days; i++) {
-      const progress = i / (days - 1);
-      const value = startValue + totalChange * progress;
-      const date = new Date();
-      date.setDate(date.getDate() - (days - 1 - i));
-
-      data.push({
-        date: date.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-        value: Math.round(value * 100) / 100,
-      });
-    }
-
-    return data;
-  };
+  const { data: portfolioData, loading, error } = usePolling(fetchPortfolio, 30000);
 
   if (loading) {
     return (
@@ -94,7 +79,7 @@ const Portfolio = () => {
         <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
           Portfolio
         </h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message="Failed to load portfolio. Please try again." />
       </div>
     );
   }

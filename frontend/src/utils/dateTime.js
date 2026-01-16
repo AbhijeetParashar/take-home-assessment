@@ -4,17 +4,17 @@
  * @returns {string} Formatted relative time string
  */
 export const formatRelativeTime = (timestamp) => {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diffMs = now - date
-  const diffMins = Math.floor(diffMs / 60000)
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
 
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
 
-  return date.toLocaleDateString()
-}
+  return date.toLocaleDateString();
+};
 
 /**
  * Format a date to a readable string
@@ -24,10 +24,21 @@ export const formatRelativeTime = (timestamp) => {
  */
 export const formatDate = (date, options = {}) => {
   const defaultOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    ...options
-  }
-  return new Date(date).toLocaleDateString('en-US', defaultOptions)
-}
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    ...options,
+  };
+  return new Date(date).toLocaleDateString("en-US", defaultOptions);
+};
+
+export const formatDateTime = (date) => {
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};

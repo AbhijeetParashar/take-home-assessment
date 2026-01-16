@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
+import { usePollingContext } from "../contexts/PollingContext";
 
 /**
  * Custom hook for polling data at regular intervals
@@ -14,6 +15,12 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const intervalRef = useRef(null);
   const isMountedRef = useRef(true);
+  const fetchFunctionRef = useRef(fetchFunction);
+  const { setLastUpdated: setGlobalLastUpdated } = usePollingContext();
+
+  useEffect(() => {
+    fetchFunctionRef.current = fetchFunction;
+  }, [fetchFunction]);
 
   const fetchData = useCallback(async () => {
     if (!isMountedRef.current) return;
@@ -21,11 +28,13 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
     try {
       setLoading(true);
       setError(null);
-      const result = await fetchFunction();
+      const result = await fetchFunctionRef.current();
 
       if (isMountedRef.current) {
+        const now = new Date();
         setData(result);
-        setLastUpdated(new Date());
+        setLastUpdated(now);
+        setGlobalLastUpdated(now);
       }
     } catch (err) {
       if (isMountedRef.current) {
@@ -37,16 +46,13 @@ export const usePolling = (fetchFunction, interval = 30000, enabled = true) => {
         setLoading(false);
       }
     }
-  }, [fetchFunction]);
+  }, [setGlobalLastUpdated]);
 
   useEffect(() => {
     isMountedRef.current = true;
 
     if (enabled) {
-      // Initial fetch
       fetchData();
-
-      // Set up polling interval
       intervalRef.current = setInterval(() => {
         fetchData();
       }, interval);

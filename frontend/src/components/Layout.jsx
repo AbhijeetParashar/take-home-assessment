@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import MetaMaskButton from "./MetaMaskButton";
 import ThemeToggle from "./ui/ThemeToggle";
+import LastUpdated from "./ui/LastUpdated";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -34,8 +35,8 @@ const Layout = ({ children }) => {
       </header>
 
       <div className="flex">
-        <aside className="w-16 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-[calc(100vh-4rem)] transition-all duration-300">
-          <nav className="p-2 lg:p-4">
+        <aside className="w-16 lg:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-[calc(100vh-4rem)] transition-all duration-300 flex flex-col">
+          <nav className="p-2 lg:p-4 flex-1">
             <ul className="space-y-2">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.path;
@@ -58,6 +59,7 @@ const Layout = ({ children }) => {
               })}
             </ul>
           </nav>
+          <LastUpdated />
         </aside>
 
         {/* Main Content */}

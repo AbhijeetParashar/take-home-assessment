@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { getDashboard, getPortfolio } from "../services/api";
+import { usePolling } from "../hooks/usePolling";
 import PortfolioSummaryCard from "../components/dashboard/PortfolioSummaryCard";
 import TopGainersLosers from "../components/dashboard/TopGainersLosers";
 import RecentNews from "../components/dashboard/RecentNews";
@@ -8,35 +9,24 @@ import LoadingCard from "../components/ui/LoadingCard";
 import ErrorMessage from "../components/ui/ErrorMessage";
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [portfolioData, setPortfolioData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const fetchDashboardData = useCallback(async () => {
+    const [dashboardResponse, portfolioResponse] = await Promise.all([
+      getDashboard(),
+      getPortfolio(),
+    ]);
+    console.log("Dashboard response:", dashboardResponse);
+    console.log("Portfolio response:", portfolioResponse);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [dashboardResponse, portfolioResponse] = await Promise.all([
-          getDashboard(),
-          getPortfolio(),
-        ]);
-        console.log("Dashboard response:", dashboardResponse);
-        console.log("Portfolio response:", portfolioResponse);
-        setDashboardData(dashboardResponse.data?.data);
-        setPortfolioData(portfolioResponse.data?.data);
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err);
-        setError("Failed to load dashboard data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+    return {
+      dashboardData: dashboardResponse.data?.data,
+      portfolioData: portfolioResponse.data?.data,
     };
-
-    fetchData();
   }, []);
+
+  const { data, loading, error } = usePolling(fetchDashboardData, 30000);
+
+  const dashboardData = data?.dashboardData;
+  const portfolioData = data?.portfolioData;
 
   if (loading) {
     return (
@@ -55,7 +45,7 @@ const Dashboard = () => {
         <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
           Dashboard
         </h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message="Failed to load dashboard data. Please try again." />
       </div>
     );
   }

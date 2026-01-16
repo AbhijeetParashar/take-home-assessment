@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { getStocks, getCrypto } from "../services/api";
+import { usePolling } from "../hooks/usePolling";
 import SearchBar from "../components/assets/SearchBar";
 import FilterButtons from "../components/assets/FilterButtons";
 import AssetsTable from "../components/assets/AssetsTable";
@@ -8,10 +9,6 @@ import LoadingCard from "../components/ui/LoadingCard";
 import ErrorMessage from "../components/ui/ErrorMessage";
 
 const Assets = () => {
-  const [stocks, setStocks] = useState([]);
-  const [crypto, setCrypto] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortConfig, setSortConfig] = useState({
@@ -20,41 +17,34 @@ const Assets = () => {
   });
   const [selectedAsset, setSelectedAsset] = useState(null);
 
-  useEffect(() => {
-    const fetchAssets = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchAssets = useCallback(async () => {
+    const [stocksResponse, cryptoResponse] = await Promise.all([
+      getStocks(),
+      getCrypto(),
+    ]);
 
-        const [stocksResponse, cryptoResponse] = await Promise.all([
-          getStocks(),
-          getCrypto(),
-        ]);
+    const stocksData = stocksResponse.data || [];
+    const cryptoData = cryptoResponse.data || [];
+    const stocksWithType = stocksData.map((stock) => ({
+      ...stock,
+      type: "Stock",
+    }));
 
-        const stocksData = stocksResponse.data || [];
-        const cryptoData = cryptoResponse.data || [];
-        const stocksWithType = stocksData.map((stock) => ({
-          ...stock,
-          type: "Stock",
-        }));
+    const cryptoWithType = cryptoData.map((coin) => ({
+      ...coin,
+      type: "Crypto",
+    }));
 
-        const cryptoWithType = cryptoData.map((coin) => ({
-          ...coin,
-          type: "Crypto",
-        }));
-
-        setStocks(stocksWithType);
-        setCrypto(cryptoWithType);
-      } catch (err) {
-        console.error("Error fetching assets:", err);
-        setError("Failed to load assets. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+    return {
+      stocks: stocksWithType,
+      crypto: cryptoWithType,
     };
-
-    fetchAssets();
   }, []);
+
+  const { data, loading, error } = usePolling(fetchAssets, 30000);
+
+  const stocks = data?.stocks || [];
+  const crypto = data?.crypto || [];
 
   const filteredAndSortedAssets = useMemo(() => {
     let allAssets = [];
@@ -123,7 +113,7 @@ const Assets = () => {
         <h1 className="text-gray-700 dark:text-gray-200 text-3xl font-bold mb-6">
           Assets
         </h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message="Failed to load assets. Please try again." />
       </div>
     );
   }
